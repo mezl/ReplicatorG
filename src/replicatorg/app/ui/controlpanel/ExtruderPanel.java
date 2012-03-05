@@ -380,6 +380,24 @@ public class ExtruderPanel extends JPanel{
 			panel.add(abpLabel);
 			panel.add(abpCheck,"wrap");
 		}
+		
+		if (tool.hasFan()) {}
+		{
+			String fanString = "Cooling Fan";
+			String enableString = "enable";
+			JLabel fanLabel = makeLabel(fanString);
+////
+			JCheckBox fanCheck = new JCheckBox(enableString);
+			fanCheck.setName("fan-check");
+			fanCheck.addItemListener(itemListener);
+////
+			add(fanLabel);
+			add(fanCheck,"wrap");
+		}
+		
+		
+		
+		
 		return panel;
 	}
 	
@@ -589,23 +607,24 @@ public class ExtruderPanel extends JPanel{
 //		}
 //
 //		// cooling fan controls
-//		if (tool.hasFan()) {
+//		if (tool.hasFan()) {}
+//		{
 //			Base.logger.finer("ExtruderPanel.hasFan(): fan automatic and not user controlled in The Replicator.");
-////			String fanString = "Cooling Fan";
-////			String enableString = "enable";
-////			Element xml = findMappingNode(tool.getXml(),"fan");
-////			if (xml != null) {
-////				fanString = xml.getAttribute("name");
-////				enableString = xml.getAttribute("actuated");
-////			}
-////			JLabel fanLabel = makeLabel(fanString);
-////
-////			JCheckBox fanCheck = new JCheckBox(enableString);
-////			fanCheck.setName("fan-check");
-////			fanCheck.addItemListener(this);
-////
-////			add(fanLabel);
-////			add(fanCheck,"wrap");
+//			String fanString = "Cooling Fan";
+//			String enableString = "enable";
+//			Element xml = findMappingNode(tool.getXml(),"fan");
+//			if (xml != null) {
+//				fanString = xml.getAttribute("name");
+//				enableString = xml.getAttribute("actuated");
+//			}
+//			JLabel fanLabel = makeLabel(fanString);
+//////
+//			JCheckBox fanCheck = new JCheckBox(enableString);
+//			fanCheck.setName("fan-check");
+//			fanCheck.addItemListener(this);
+//////
+//			add(fanLabel);
+//			add(fanCheck,"wrap");
 //		}
 //
 //		// cooling fan controls
@@ -816,6 +835,9 @@ public class ExtruderPanel extends JPanel{
 			}
 			else if (name.equals("abp-check")) {
 				machine.runCommand(new replicatorg.drivers.commands.ToggleAutomatedBuildPlatform(true,toolhead));
+				machine.runCommand(new replicatorg.drivers.commands.EnableFan(toolhead));
+			}
+			else if (name.equals("fan-check")){
 				machine.runCommand(new replicatorg.drivers.commands.EnableFan(toolhead));
 			}
 		} else {

@@ -15,6 +15,7 @@ public class SetTemperature implements DriverCommand {
 	 */
 	@Deprecated
 	public SetTemperature(double temperature) {
+		System.out.println("old way to set temp: tmp:"+temperature+" index : -1");
 		this.temperature = temperature;
 		this.toolhead = -1;/// do problematic 'get current toolhead
 	}
@@ -25,6 +26,7 @@ public class SetTemperature implements DriverCommand {
 	 * @param toolIndex
 	 */
 	public SetTemperature(double temperature, int toolIndex) {
+		System.out.println("New wat to set temp: tmp:"+temperature+" index :"+toolIndex);
 		this.temperature = temperature;
 		this.toolhead = toolIndex;
 	}

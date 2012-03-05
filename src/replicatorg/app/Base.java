@@ -982,8 +982,14 @@ public class Base {
 		BufferedImage image = null;
 
 		// try to get the URL as a system resource
-	    URL url = ClassLoader.getSystemResource(name);
+		String systempath = System.getProperty("user.dir");
+		String fullpath = systempath+"/resources/"+name;
+	    File file = new File(fullpath);
+
+	    
+	    //System.out.println("Image URL is "+" Img Name is "+name);
 	    try {
+	    	URL url = file.toURL();
 	    	image = ImageIO.read(url);
 	    	MediaTracker tracker = new MediaTracker(who);
 	    	tracker.addImage(image, 0);
