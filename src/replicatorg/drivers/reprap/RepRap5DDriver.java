@@ -704,10 +704,13 @@ public class RepRap5DDriver extends SerialDriver implements SerialFifoEventListe
 			//System.out.println("received: " + line);
 			if(debugLevel > 1)
 				Base.logger.info("<< " + line);
-
+			
 			if (line.length() == 0)
 				Base.logger.fine("empty line received");
-			else if (line.startsWith("echo:")) {
+			else
+				Base.logger.fine("Line: " + line);	
+				
+			if (line.startsWith("echo:")) {
 					//if echo is turned on relay it to the user for debugging
 					Base.logger.info(line);
 			}
@@ -720,7 +723,7 @@ public class RepRap5DDriver extends SerialDriver implements SerialFifoEventListe
 					machine.currentTool().setCurrentTemperature(
 							Double.parseDouble(temp));
 			    }
-				r = Pattern.compile("^ok.*b:([0-9\\.]+)$");
+				r = Pattern.compile("^ok.*b:([0-9\\.]+)");
 			    m = r.matcher(line);
 			    if (m.find( )) {
 			    	String bedTemp = m.group(1);
@@ -882,6 +885,8 @@ public class RepRap5DDriver extends SerialDriver implements SerialFifoEventListe
 
 			} else if (line.startsWith("t:") || line.startsWith("c:")) {
 				// temperature, position handled above
+			} else if (line.startsWith("x:")) {
+				//x:0.00y:0.00z:0.00e:0.00 count x:0.00y:0.00z:0.00
 			} else {
 				Base.logger.severe("Unknown: " + line);
 			}
@@ -950,12 +955,14 @@ public class RepRap5DDriver extends SerialDriver implements SerialFifoEventListe
 	 **************************************************************************/
 
 	public void queuePoint(Point5d p) throws RetryException {
+		Base.logger.info("Move:"+p.toString()+" F:"+getCurrentFeedrate());
 		String cmd = "G1 F" + df.format(getCurrentFeedrate());
 		
 		sendCommand(cmd);
 
 		cmd = "G1 X" + df.format(p.x()) + " Y" + df.format(p.y()) + " Z"
-				+ df.format(p.z()) + " F" + df.format(getCurrentFeedrate());
+				+ df.format(p.z())+ " E"
+				+ df.format(p.a()) + " F" + df.format(getCurrentFeedrate());
 
 		sendCommand(cmd);
 
@@ -1146,6 +1153,18 @@ public class RepRap5DDriver extends SerialDriver implements SerialFifoEventListe
 	 * Temperature interface functions
 	 * @throws RetryException 
 	 **************************************************************************/
+	public void readAllTemperatures() {
+		readTemperature();
+		super.readAllTemperatures();
+	}
+
+	public void setTemperature(double temperature, int toolIndex) throws RetryException{
+		Base.logger.info("Send Set Extruder Temp:"+ "M104 S" + df.format(temperature)+" T"+toolIndex);		
+		sendCommand("M104 S" + df.format(temperature)+" T"+toolIndex);		
+		super.setTemperature(temperature,toolIndex);		
+	}
+	
+	
 	public void setTemperature(double temperature) throws RetryException {
 		sendCommand(_getToolCode() + "M104 S" + df.format(temperature));
 
@@ -1154,7 +1173,6 @@ public class RepRap5DDriver extends SerialDriver implements SerialFifoEventListe
 
 	public void readTemperature() {
 		sendCommand(_getToolCode() + "M105");
-
 		super.readTemperature();
 	}
 
@@ -1163,6 +1181,7 @@ public class RepRap5DDriver extends SerialDriver implements SerialFifoEventListe
 	}
 
 	public void setPlatformTemperature(double temperature) throws RetryException {
+		Base.logger.info("Send Set Bed Temp:"+_getToolCode() + "M140 S" + df.format(temperature));
 		sendCommand(_getToolCode() + "M140 S" + df.format(temperature));
 		
 		super.setPlatformTemperature(temperature);
@@ -1201,16 +1220,17 @@ public class RepRap5DDriver extends SerialDriver implements SerialFifoEventListe
 	 * Fan interface functions
 	 * @throws RetryException 
 	 **************************************************************************/
-	public void enableFan() throws RetryException {
+	public void enableFan(int toolhead) throws RetryException {		
 		sendCommand(_getToolCode() + "M106");
 
-		super.enableFan();
+		super.enableFan(toolhead);
 	}
 
-	public void disableFan() throws RetryException {
+	public void disableFan(int toolhead) throws RetryException {
+		Base.logger.info("Disable Fan.");
 		sendCommand(_getToolCode() + "M107");
 
-		super.disableFan();
+		super.disableFan(toolhead);
 	}
 
 	/***************************************************************************
